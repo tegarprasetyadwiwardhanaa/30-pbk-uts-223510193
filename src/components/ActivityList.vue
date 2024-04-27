@@ -1,127 +1,180 @@
 <template>
-    <div>
-      <h2>Daftar Kegiatan</h2>
-  
-      <!-- Tombol untuk Mengaktifkan/Menonaktifkan Filter -->
-      <button @click="toggleFilter">
-        {{ showOnlyUncompleted ? 'Tampilkan Semua' : 'Tampilkan yang Belum Selesai' }}
-      </button>
-  
-      <!-- Daftar Kegiatan dengan Filter -->
-      <ul>
-        <!-- Gunakan satu v-for untuk menghindari pengulangan ganda -->
-        <li
-          v-for="(activity, index) in filteredActivities" 
-          :key="index"
-          :class="{ 'completed': activity.completed }" 
-        >
-          <!-- Hanya tampilkan deskripsi dan tombol hapus -->
-          <input
-            type="checkbox"
-            v-model="activity.completed"
-          />
-          {{ activity.description }}
-          <!-- Tombol Hapus -->
-          <button @click="removeActivity(index)">Hapus</button>
-        </li>
-      </ul>
-  
-      <!-- Formulir untuk Menambah Kegiatan Baru -->
-      <form @submit.prevent="addActivity">
+  <div class="container">
+    <h2>Daftar Kegiatan</h2>
+
+    <button @click="toggleFilter">
+      {{ showOnlyUncompleted ? 'Tampilkan Semua' : 'Tampilkan yang Belum Selesai' }}
+    </button>
+
+    <ul class="activity-list">
+      <li
+        v-for="(activity, index) in filteredActivities"
+        :key="index"
+      >
         <input
-          type="text"
-          v-model="newActivity" 
-          placeholder="Tambah kegiatan baru"
+          type="checkbox"
+          v-model="activity.completed"
         />
-        <button type="submit">Tambah</button>
-      </form>
-    </div>
-  </template>
-  
-  <script setup>
-  import { ref, computed } from 'vue';
-  
-  // Inisialisasi daftar kegiatan dan variabel untuk kegiatan baru
-  const activities = ref([]);
-  const newActivity = ref('');
-  const showOnlyUncompleted = ref(false); // Status untuk filter
-  
-  // Tambahkan kegiatan baru
-  const addActivity = () => {
-    if (newActivity.value.trim() !== '') {
-      activities.value.push({
-        description: newActivity.value,
-        completed: false, // Inisialisasi sebagai belum selesai
-      });
-      newActivity.value = ''; // Kosongkan input setelah ditambahkan
-    }
-  };
-  
-  // Hapus kegiatan
-  const removeActivity = (index) => {
-    activities.value.splice(index, 1); // Hapus kegiatan dengan `splice`
-  };
-  
-  // Toggle filter untuk hanya menampilkan yang belum selesai
-  const toggleFilter = () => {
-    showOnlyUncompleted.value = !showOnlyUncompleted.value;
-  };
-  
-  // Komputasi daftar kegiatan dengan filter
-  const filteredActivities = computed(() => {
-    if (showOnlyUncompleted.value) {
-      return activities.value.filter(activity => !activity.completed); // Hanya yang belum selesai
-    }
-    return activities.value; // Semua kegiatan
-  });
-  </script>
-  
-  <style scoped>
-/* Gaya untuk elemen daftar */
-ul {
-  list-style-type: none;
+        <span :class="{ completed: activity.completed }">{{ index + 1 }}. {{ activity.description }}</span>
+        <button @click="removeActivity(index)">Hapus</button>
+
+        <div v-if="activity.completed" class="completed-box">Sudah Selesai</div>
+      </li>
+    </ul>
+
+    <form @submit.prevent="addActivity" class="activity-form">
+      <input
+        type="text"
+        v-model="newActivity"
+        placeholder="Tambah kegiatan baru"
+      />
+      <button type="submit">Tambah</button>
+    </form>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue';
+
+const activities = ref([]);
+const newActivity = ref('');
+const showOnlyUncompleted = ref(false);
+
+const addActivity = () => {
+  if (newActivity.value.trim() !== '') {
+    activities.value.push({
+      description: newActivity.value,
+      completed: false,
+    });
+    newActivity.value = '';
+  }
+};
+
+const removeActivity = (index) => {
+  activities.value.splice(index, 1);
+};
+
+const toggleFilter = () => {
+  showOnlyUncompleted.value = !showOnlyUncompleted.value;
+};
+
+const filteredActivities = computed(() => {
+  if (showOnlyUncompleted.value) {
+    return activities.value.filter(activity => !activity.completed);
+  }
+  return activities.value;
+});
+</script>
+
+<style scoped>
+.container {
+  width: 800px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  color: #222;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  background-color: #428bca;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: #357ebd;
+}
+
+.activity-list {
+  list-style: none;
   padding: 0;
   margin: 0;
 }
 
-li {
-  padding: 10px;
-  border-bottom: 1px solid #e0e0e0; /* Tambahkan batas di bawah setiap item */
+.activity-list li {
   display: flex;
-  align-items: center; /* Atur semua elemen dalam item secara vertikal */
-  justify-content: space-between; /* Ruang antara elemen input dan tombol */
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
 }
 
-/* Gaya untuk input dan tombol */
-input {
-  padding: 7px; /* Sedikit lebih besar untuk tampilan yang lebih baik */
-  margin-right: 10px; /* Spasi antara input dan tombol */
-  border: 1px solid #ccc;
-  border-radius: 4px; /* Tambahkan sudut melengkung */
+input[type="checkbox"] {
+  margin-right: 10px;
 }
 
-button {
-  padding: 7px 15px; /* Lebih besar untuk klik yang lebih baik */
-  background-color: #007bff; /* Warna biru standar */
-  color: white;
-  border: none;
-  border-radius: 4px; /* Tambahkan sudut melengkung */
-  cursor: pointer; /* Gaya kursor saat di atas tombol */
-  transition: background-color 0.3s; /* Efek transisi saat mengarahkan kursor */
+.activity-list li span {
+  flex: 1;
 }
-
-button:hover {
-  background-color: #0056b3; /* Warna yang lebih gelap saat di hover */
-}
-
-/* Gaya untuk kegiatan yang telah selesai */
 .completed {
-  text-decoration: line-through;
-  color: grey;
+  text-decoration: line-through; /* Strikethrough for completed activities */
 }
 
-/* Gaya tambahan untuk formulir */
-form {
-  margin-top: 20px; /* Beri jarak antara daftar dan formulir */
+.activity-list li.completed-activity span {
+  text-decoration: line-through;
+}
+
+.activity-list li button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  background-color: #d9534f;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.activity-list li button:hover {
+  background-color: #c9302c;
+}
+
+.activity-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.activity-form input[type="text"] {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.activity-form button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  background-color: #20a8d8;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.activity-form button:hover {
+  background-color: #1b87b8;
+}
+
+.completed-box {
+  background-color: #28a745;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
 }
 </style>
