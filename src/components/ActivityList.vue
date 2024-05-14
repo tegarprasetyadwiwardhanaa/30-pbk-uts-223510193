@@ -1,45 +1,59 @@
 <template>
-  <div class="container">
-    <h2>Daftar Kegiatan</h2>
+  <div>
+    <header>
+      <nav>
+        <ul>
+          <li><button @click="currentView = 'Todos'">Todos</button></li>
+          <li><button @click="currentView = 'Post'">Post</button></li>
+        </ul>
+      </nav>
+    </header>
 
-    <button @click="toggleFilter">
-      {{ showOnlyUncompleted ? 'Tampilkan Semua' : 'Tampilkan yang Belum Selesai' }}
-    </button>
+    <div v-if="currentView === 'Todos'" class="container">
+      <h2>Daftar Kegiatan</h2>
+      <button @click="toggleFilter">
+        {{ showOnlyUncompleted ? 'Tampilkan Semua' : 'Tampilkan yang Belum Selesai' }}
+      </button>
+      <ul class="activity-list">
+        <li v-for="(activity, index) in filteredActivities" :key="index">
+          <input type="checkbox" v-model="activity.completed" />
+          <span :class="{ completed: activity.completed }">{{ index + 1 }}. {{ activity.description }}</span>
+          <button @click="removeActivity(index)">Hapus</button>
+          <div v-if="activity.completed" class="completed-box">Sudah Selesai</div>
+        </li>
+      </ul>
+      <form @submit.prevent="addActivity" class="activity-form">
+        <input type="text" v-model="newActivity" placeholder="Tambah kegiatan baru" />
+        <button type="submit">Tambah</button>
+      </form>
+    </div>
 
-    <ul class="activity-list">
-      <li
-        v-for="(activity, index) in filteredActivities"
-        :key="index"
-      >
-        <input
-          type="checkbox"
-          v-model="activity.completed"
-        />
-        <span :class="{ completed: activity.completed }">{{ index + 1 }}. {{ activity.description }}</span>
-        <button @click="removeActivity(index)">Hapus</button>
-
-        <div v-if="activity.completed" class="completed-box">Sudah Selesai</div>
-      </li>
-    </ul>
-
-    <form @submit.prevent="addActivity" class="activity-form">
-      <input
-        type="text"
-        v-model="newActivity"
-        placeholder="Tambah kegiatan baru"
-      />
-      <button type="submit">Tambah</button>
-    </form>
+    <div v-if="currentView === 'Post'" class="container">
+      <h2>Postingan User</h2>
+      <select v-model="selectedUserId" @change="fetchPosts">
+        <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+      </select>
+      <ul class="post-list">
+        <li v-for="post in posts" :key="post.id">
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.body }}</p>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import axios from 'axios';
 
+// State for activities (Todos)
 const activities = ref([]);
 const newActivity = ref('');
 const showOnlyUncompleted = ref(false);
+const currentView = ref('Todos');
 
+// Functions for Todos
 const addActivity = () => {
   if (newActivity.value.trim() !== '') {
     activities.value.push({
@@ -64,9 +78,71 @@ const filteredActivities = computed(() => {
   }
   return activities.value;
 });
+
+// State for posts
+const users = ref([]);
+const posts = ref([]);
+const selectedUserId = ref(null);
+
+// Fetch users and posts
+const fetchUsers = async () => {
+  try {
+    const response = await axios.get('https://jsonplaceholder.typicode.com/users');
+    users.value = response.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+  }
+};
+
+const fetchPosts = async () => {
+  if (selectedUserId.value) {
+    try {
+      const response = await axios.get(`https://jsonplaceholder.typicode.com/posts?userId=${selectedUserId.value}`);
+      posts.value = response.data;
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+  } else {
+    posts.value = [];
+  }
+};
+
+onMounted(fetchUsers);
+
+watch(selectedUserId, fetchPosts);
 </script>
 
 <style scoped>
+header {
+  background-color: #428bca;
+  color: white;
+  padding: 15px 20px;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 20px;
+  justify-content: center; /* Menyelaraskan menu ke tengah */
+}
+
+nav ul li {
+  display: inline;
+}
+
+nav ul li button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+nav ul li button:hover {
+  text-decoration: underline;
+}
+
 .container {
   width: 800px;
   margin: 50px auto;
@@ -120,11 +196,8 @@ input[type="checkbox"] {
 .activity-list li span {
   flex: 1;
 }
-.completed {
-  text-decoration: line-through; /* Strikethrough for completed activities */
-}
 
-.activity-list li.completed-activity span {
+.completed {
   text-decoration: line-through;
 }
 
@@ -176,5 +249,25 @@ input[type="checkbox"] {
   border-radius: 5px;
   color: white;
   font-weight: bold;
+}
+
+.post-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.post-list li {
+  margin-bottom: 15px;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.post-list li h3 {
+  margin: 0 0 10px;
+}
+
+.post-list li p {
+  margin: 0;
 }
 </style>

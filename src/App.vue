@@ -1,34 +1,78 @@
 <template>
   <div>
-    <h1>list kegiatan sehari-hari</h1>
-    <ActivityList />
+    <header>
+      <nav>
+        <ul>
+          <li><button @click="currentView = 'Todos'">Todos</button></li>
+          <li><button @click="currentView = 'Post'">Post</button></li>
+        </ul>
+      </nav>
+    </header>
+
+    <component :is="currentViewComponent" />
   </div>
 </template>
 
 <script setup>
-import ActivityList from './components/ActivityList.vue';
+import { ref, computed } from 'vue';
+import Todos from './Todos.vue';
+import Post from './Post.vue';
+
+const currentView = ref('Todos');
+
+const currentViewComponent = computed(() => {
+  return currentView.value === 'Todos' ? Todos : Post;
+});
 </script>
 
 <style scoped>
+header {
+  background-color: #007bff;
+  color: white;
+  padding: 15px 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  margin: 0;
+nav ul {
+  list-style: none;
   padding: 0;
-  background-color: #222;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin: 0;
 }
 
-
-h1 {
-  /* Headline style */
-  font-size: 2.5rem; /* Large font size for a headline */
-  text-align: center; /* Center align the text */
-  padding: 20px; /* Add padding around the text */
-  margin: 0; /* Remove default margins to avoid extra spacing */
-  background-color: #f0f0f0; /* Light background color to make it stand out */
-  color: #333; /* Dark color for the text */
-  text-transform: uppercase; /* Uppercase letters for emphasis */
-  border-bottom: 2px solid #ccc; /* Border at the bottom for separation */
+nav ul li {
+  display: inline;
 }
+
+nav ul li button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+  border-radius: 5px;
+}
+
+nav ul li button:hover {
+  text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+nav ul li button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+nav ul li button.active {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
 </style>
