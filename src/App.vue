@@ -1,6 +1,7 @@
 <template>
-  <div>
+  <div id="app">
     <header>
+      <h1>Todo & Post App</h1>
       <nav>
         <ul>
           <li><button @click="currentView = 'Todos'">Todos</button></li>
@@ -8,15 +9,16 @@
         </ul>
       </nav>
     </header>
-
-    <component :is="currentViewComponent" />
+    <main>
+      <component :is="currentViewComponent" />
+    </main>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import Todos from './Todos.vue';
-import Post from './Post.vue';
+import Todos from './components/Todos.vue';
+import Post from './components/Post.vue';
 
 const currentView = ref('Todos');
 
@@ -26,14 +28,23 @@ const currentViewComponent = computed(() => {
 </script>
 
 <style scoped>
+#app {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
 header {
   background-color: #007bff;
   color: white;
-  padding: 15px 20px;
+  padding: 15px 0;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+}
+
+h1 {
+  margin: 0;
 }
 
 nav ul {
@@ -75,4 +86,12 @@ nav ul li button.active {
   background-color: rgba(255, 255, 255, 0.3);
 }
 
+main {
+  flex: 1;
+}
+
+footer {
+  background-color: #f8f9fa;
+  padding: 10px 0;
+}
 </style>

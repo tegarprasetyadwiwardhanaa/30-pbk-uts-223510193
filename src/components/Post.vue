@@ -4,22 +4,21 @@
     <select v-model="selectedUserId" @change="fetchPosts">
       <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
     </select>
-    <ul class="post-list">
-      <li v-for="post in posts" :key="post.id">
-        <h3>{{ post.title }}</h3>
-        <p>{{ post.body }}</p>
-      </li>
-    </ul>
+    <post-list :posts="posts" @selectPost="selectPost" />
+    <post-detail v-if="selectedPost" :post="selectedPost" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
+import PostList from './PostsList.vue';
+import PostDetail from './PostDetail.vue';
 
 const users = ref([]);
 const posts = ref([]);
 const selectedUserId = ref(null);
+const selectedPost = ref(null);
 
 const fetchUsers = async () => {
   try {
@@ -41,6 +40,10 @@ const fetchPosts = async () => {
   } else {
     posts.value = [];
   }
+};
+
+const selectPost = (postId) => {
+  selectedPost.value = posts.value.find(post => post.id === postId);
 };
 
 onMounted(fetchUsers);
@@ -72,25 +75,5 @@ select {
   border: 1px solid #ccc;
   border-radius: 3px;
   margin-bottom: 20px;
-}
-
-.post-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.post-list li {
-  margin-bottom: 15px;
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-}
-
-.post-list li h3 {
-  margin: 0 0 10px;
-}
-
-.post-list li p {
-  margin: 0;
 }
 </style>
