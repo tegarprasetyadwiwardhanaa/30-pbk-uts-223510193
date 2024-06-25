@@ -1,51 +1,68 @@
 <template>
-  <div id="app">
+  <div id="app"> 
     <header>
-      <h1>Todo & Post App</h1>
+      <h1>Tugas UAS</h1>
       <nav>
         <ul>
-          <li><button @click="currentView = 'Todos'">Todos</button></li>
-          <li><button @click="currentView = 'Post'">Post</button></li>
+          <li>
+            <router-link to="/todos">Todos</router-link>
+          </li>
+          <li>
+            <router-link to="/posts">Posts</router-link>
+          </li>
+          <li>
+            <router-link to="/albums">Albums</router-link>
+          </li>
         </ul>
       </nav>
     </header>
     <main>
-      <component :is="currentViewComponent" />
+      <router-view />
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import Todos from './components/Todos.vue';
-import Post from './components/Post.vue';
+import { onMounted } from 'vue';
+import { usePhotoAlbumStore } from './stores/photoAlbum';
 
-const currentView = ref('Todos');
+const photoAlbumStore = usePhotoAlbumStore();
 
-const currentViewComponent = computed(() => {
-  return currentView.value === 'Todos' ? Todos : Post;
+onMounted(() => {
+  photoAlbumStore.fetchAlbums();
 });
 </script>
 
+
 <style scoped>
+
 #app {
   font-family: Arial, sans-serif;
   text-align: center;
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
+  display: flex; 
+  flex-direction: column; 
+  min-height: 100vh; 
 }
+
+header, main, footer {
+  padding: 15px; 
+}
+
+main {
+  flex: 1; 
+}
+
 
 header {
   background-color: #007bff;
   color: white;
-  padding: 15px 0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
 }
 
 h1 {
   margin: 0;
 }
+
 
 nav ul {
   list-style: none;
@@ -57,41 +74,40 @@ nav ul {
 }
 
 nav ul li {
-  display: inline;
+  display: inline; 
 }
 
-nav ul li button {
-  background: none;
+
+nav a { 
+  background: none; 
   border: none;
-  color: white;
+  color: white; 
   cursor: pointer;
   font-size: 16px;
   padding: 10px 20px;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease; 
   border-radius: 5px;
-}
-
-nav ul li button:hover {
   text-decoration: none;
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
 }
 
-nav ul li button:focus {
+nav a:hover {
+  text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.2); 
+  transform: translateY(-2px); 
+}
+
+nav a:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); 
 }
 
-nav ul li button.active {
-  background-color: rgba(255, 255, 255, 0.3);
+.router-link-active { 
+  background-color: rgba(255, 255, 255, 0.3); 
 }
 
-main {
-  flex: 1;
-}
 
 footer {
-  background-color: #f8f9fa;
-  padding: 10px 0;
+  background-color: #f8f9fa; 
 }
+
 </style>
