@@ -1,54 +1,42 @@
 <template>
   <div class="container">
     <h2>Postingan User</h2>
-    <select v-model="selectedUserId" @change="fetchPosts">
-      <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
-    </select>
-    <post-list :posts="posts" @selectPost="selectPost" />
-    <post-detail v-if="selectedPost" :post="selectedPost" />
+
+    <div v-if="isLoadingUsers || isLoadingPosts">Loading...</div>
+    <div v-else>
+      <select v-model="selectedUserId" @change="fetchPosts">
+        <option v-for="user in users" :key="user.id" :value="user.id">
+          {{ user.name }}
+        </option>
+      </select>
+
+      <PostList :posts="posts" @select-post="handleSelectPost" /> <PostDetail :post="selectedPost" v-if="selectedPost" />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import axios from 'axios';
+import { storeToRefs } from 'pinia';
+import { onMounted, watch } from 'vue';
+import { useUserPostsStore } from '../stores/posts';
 import PostList from './PostsList.vue';
 import PostDetail from './PostDetail.vue';
 
-const users = ref([]);
-const posts = ref([]);
-const selectedUserId = ref(null);
-const selectedPost = ref(null);
+const userPostsStore = useUserPostsStore();
+const { users, posts, selectedUserId, selectedPost, isLoadingUsers, isLoadingPosts } = storeToRefs(userPostsStore);
 
-const fetchUsers = async () => {
-  try {
-    const response = await axios.get('https://jsonplaceholder.typicode.com/users');
-    users.value = response.data;
-  } catch (error) {
-    console.error("Error fetching users:", error);
-  }
-};
+onMounted(userPostsStore.fetchUsers);
 
-const fetchPosts = async () => {
-  if (selectedUserId.value) {
-    try {
-      const response = await axios.get(`https://jsonplaceholder.typicode.com/posts?userId=${selectedUserId.value}`);
-      posts.value = response.data;
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    }
-  } else {
-    posts.value = [];
-  }
-};
+watch(() => selectedUserId.value, userPostsStore.fetchPosts);
 
-const selectPost = (postId) => {
-  selectedPost.value = posts.value.find(post => post.id === postId);
-};
-
-onMounted(fetchUsers);
-watch(selectedUserId, fetchPosts);
+function handleSelectPost(postId) {
+  userPostsStore.selectPost(postId);
+}
 </script>
+
+
+
+
 
 <style scoped>
 .container {

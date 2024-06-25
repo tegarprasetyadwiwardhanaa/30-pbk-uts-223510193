@@ -1,58 +1,50 @@
 <template>
-    <form @submit.prevent="handleSubmit" class="activity-form">
-        <input type="text" v-model="newActivity" placeholder="Tambah kegiatan baru" />
-        <button type="submit">Tambah</button>
+    <form @submit.prevent="addActivity">
+      <input v-model="description" type="text" placeholder="Tambah kegiatan baru" />
+      <button type="submit">Tambah</button>
     </form>
-</template>
-
-<script setup>
-    import { ref, defineEmits } from 'vue';
-
-    const newActivity = ref('');
-    const emits = defineEmits(['add']);
-
-    const handleSubmit = () => {
-        if (newActivity.value.trim() !== '') {
-        emits('add', newActivity.value);
-        newActivity.value = '';
-        }
-    };
-</script>
-
-<style scoped>
-.activity-form {
+  </template>
+  
+  <script setup>
+  import { ref, getCurrentInstance } from 'vue';
+  
+  const description = ref('');
+  const { emit } = getCurrentInstance();
+  
+  function addActivity() {
+    const trimmedDescription = description.value.trim();
+    if (trimmedDescription !== '') {
+      // Emit event to parent component (todos.vue) with the description
+      emit('add', trimmedDescription);
+      description.value = ''; // Reset input after adding
+    } else {
+      console.warn('Deskripsi tidak boleh kosong');
+    }
+  }
+  </script>
+  
+  <style scoped>
+  form {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 10px;
     margin-top: 20px;
-}
-
-.activity-form input[type="text"] {
+  }
+  input {
     flex: 1;
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-radius: 3px;
-    font-size: 1rem;
-    margin-right: 10px;
-    transition: border-color 0.3s ease-in-out;
-}
-
-.activity-form input[type="text"]:focus {
-    border-color: #007bff;
-    outline: none;
-}
-
-.activity-form button {
+  }
+  button {
     padding: 10px 20px;
     border: none;
     border-radius: 3px;
     background-color: #28a745;
     color: white;
     cursor: pointer;
-    transition: background-color 0.3s ease-in-out;
-}
-
-.activity-form button:hover {
+  }
+  button:hover {
     background-color: #218838;
-}
-</style>
+  }
+  </style>
+  

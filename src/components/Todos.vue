@@ -1,60 +1,28 @@
 <template>
   <div class="container">
     <h2>Daftar Kegiatan</h2>
-    <button @click="toggleFilter">
-      {{ showOnlyUncompleted ? 'Tampilkan Semua' : 'Tampilkan yang Belum Selesai' }}
+    <button @click="todoStore.toggleFilter">
+      {{ todoStore.showOnlyUncompleted ? 'Tampilkan Semua' : 'Tampilkan yang Belum Selesai' }}
     </button>
     <ul class="activity-list">
-      <todo-item
-        v-for="(activity, index) in filteredActivities"
-        :key="index"
-        :activity="activity"
-        :index="index"
-        @remove="removeActivity(index)"
-      ></todo-item>
-    </ul>
-    <activity-form @add="handleAddActivity" />
+    <todo-item
+      v-for="todo in todoStore.filteredActivities"  
+      :key="todo.id"       
+      :todo="todo"
+      @remove="todoStore.removeActivity(todo.id)" 
+      @toggle-completed="todoStore.toggleCompleted(todo.id)"  
+    />
+  </ul>
+    <activity-form @add="todoStore.addActivity" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, defineEmits } from 'vue';
+import { useTodoStore } from '../stores/todoStore';
 import TodoItem from './TodoItem.vue';
 import ActivityForm from './ActivityForm.vue';
 
-const emits = defineEmits(['add']);
-
-const activities = ref([]);
-const showOnlyUncompleted = ref(false);
-
-const addActivity = (description) => {
-  if (description.trim() !== '') {
-    activities.value.push({
-      description: description,
-      completed: false,
-    });
-  }
-};
-
-const removeActivity = (index) => {
-  activities.value.splice(index, 1);
-};
-
-const toggleFilter = () => {
-  showOnlyUncompleted.value = !showOnlyUncompleted.value;
-};
-
-const filteredActivities = computed(() => {
-  if (showOnlyUncompleted.value) {
-    return activities.value.filter(activity => !activity.completed);
-  }
-  return activities.value;
-});
-
-const handleAddActivity = (description) => {
-  addActivity(description);
-};
-
+const todoStore = useTodoStore();
 </script>
 
 <style scoped>
